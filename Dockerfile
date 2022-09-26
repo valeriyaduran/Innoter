@@ -6,13 +6,13 @@ RUN pip3 install pipenv
 
 WORKDIR /app
 
-COPY ./Pipfile .
-COPY ./Pipfile.lock .
+COPY Pipfile /app
+COPY Pipfile.lock ./
 
 
 RUN pipenv install --system --deploy --ignore-pipfile
 
-COPY . .
+COPY . /app
 
-RUN chmod +x ./entrypoint.sh
-CMD ["./entrypoint.sh"]
+RUN chmod +x /app/entrypoint.sh
+CMD ["/app/entrypoint.sh"]
