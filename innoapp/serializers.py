@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from innoapp.models import Page, Post
+from innoapp.models import Page, Post, Tag
 
 
 class PageSerializer(serializers.ModelSerializer):
@@ -15,3 +15,9 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ("page", "content", "reply_to", "created_at", "updated_at")
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']

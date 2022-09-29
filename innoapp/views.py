@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from innoapp.models import Page, Post
-from innoapp.serializers import PageSerializer, PostSerializer
+from innoapp.models import Page, Post, Tag
+from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -19,3 +19,11 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Post.objects.filter(page=self.kwargs['page_pk'])
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    serializer_class = TagSerializer
+
+    def get_queryset(self):
+        return Tag.objects.filter(pages=self.kwargs['page_pk'])
+
