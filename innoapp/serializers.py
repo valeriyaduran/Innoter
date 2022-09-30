@@ -4,6 +4,8 @@ from innoapp.models import Page, Post, Tag
 
 
 class PageSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Page
         fields = (
