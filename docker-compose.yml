@@ -13,3 +13,7 @@ services:
       - "5432:5432"
     env_file:
       - .env.dev
+    volumes:
+      - my-datavolume:/var/lib/postgres
+volumes:
+  my-datavolume:
