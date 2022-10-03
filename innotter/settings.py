@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "innoapp.apps.InnoappConfig",
-    "accounts.apps.AccountsConfig"
+    "accounts.apps.AccountsConfig",
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

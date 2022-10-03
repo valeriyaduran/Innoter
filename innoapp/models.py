@@ -13,17 +13,17 @@ class Page(models.Model):
     description = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, related_name='pages')
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='page')
-    followers = models.ManyToManyField(User, related_name='follows')
+    followers = models.ManyToManyField(User, related_name='follows', blank=True)
     image = models.URLField(null=True, blank=True)
     is_private = models.BooleanField(default=False)
-    follow_requests = models.ManyToManyField(User, related_name='requests')
-
+    follow_requests = models.ManyToManyField(User, related_name='requests', blank=True)
     unblock_date = models.DateTimeField(null=True, blank=True)
 
 
 class Post(models.Model):
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name='posts')
     content = models.CharField(max_length=180)
-    reply_to = models.ForeignKey('innoapp.Post', on_delete=models.SET_NULL, null=True, related_name='replies')
+    reply_to = models.ForeignKey('innoapp.Post', on_delete=models.SET_NULL, null=True, related_name='replies',
+                                 blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
