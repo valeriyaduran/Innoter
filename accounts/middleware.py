@@ -13,7 +13,7 @@ class JWTAuthMiddleware:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if request.user.is_authenticated:
-            token = request.HEADERS.get('jwt')
+            token = request.headers.get('jwt')
             # token = request.COOKIES.get('jwt')
             if not token:
                 raise AuthenticationFailed('Unauthenticated!')

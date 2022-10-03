@@ -16,8 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from accounts.views import UserFollowersViewSet, UserRequestsViewSet
-from accounts.views import UserViewSet, UserRequestsViewSet, RegisterView, LoginView, LogoutView
+from accounts.views import UserFollowersViewSet, UserRequestsViewSet, RegisterView, LoginView, LogoutView
 from innoapp.views import PageViewSet, PostViewSet, TagViewSet
 
 from rest_framework_nested import routers
