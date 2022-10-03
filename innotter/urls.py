@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from accounts.views import UserViewSet, UserRequestsViewSet, RegisterView, LoginView, LogoutView
+from accounts.views import UserViewSet, UserRequestsViewSet, RegisterViewSet, LoginViewSet, LogoutViewSet
 from innoapp.views import PageViewSet, PostViewSet, TagViewSet
 
 from rest_framework_nested import routers
@@ -39,7 +39,7 @@ urlpatterns = [
     path("api/v1/", include(tag_router.urls)),
     path("api/v1/", include(follower_router.urls)),
     path("api/v1/", include(follow_request_router.urls)),
-    path("api/v1/register/", RegisterView.as_view()),
-    path("api/v1/login/", LoginView.as_view()),
-    path("api/v1/logout/", LogoutView.as_view())
+    path("api/v1/register/", RegisterViewSet),
+    path("api/v1/login/", LoginViewSet),
+    path("api/v1/logout/", LogoutViewSet)
 ]

@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from accounts.models import User
 from accounts.serializers import UserSerializer
@@ -22,15 +21,11 @@ class UserRequestsViewSet(viewsets.ModelViewSet):
         return User.objects.filter(requests=self.kwargs['page_pk'])
 
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+class RegisterViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
 
 
-class LoginView(APIView):
+class LoginViewSet(viewsets.ModelViewSet):
     def post(self, request):
         email = request.data['email']
         password = request.data['password']
@@ -45,14 +40,12 @@ class LoginView(APIView):
 
         response = Response()
         response.headers = {'jwt': CustomTokenGenerator.generate_token(request)}
-        # response.set_cookie(key='jwt', value=CustomTokenGenerator.generate_token(request), httponly=True)
         return response
 
 
-class LogoutView(APIView):
+class LogoutViewSet(viewsets.ModelViewSet):
     def post(self, request):
         response = Response()
         response.headers.pop('jwt')
-        # response.delete_cookie('jwt')
         response.data = {'message': 'success'}
         return response
