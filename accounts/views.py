@@ -44,13 +44,15 @@ class LoginView(APIView):
             raise AuthenticationFailed('Incorrect password!')
 
         response = Response()
-        response.set_cookie(key='jwt', value=CustomTokenGenerator.generate_token(request), httponly=True)
+        response.headers = {'jwt': CustomTokenGenerator.generate_token(request)}
+        # response.set_cookie(key='jwt', value=CustomTokenGenerator.generate_token(request), httponly=True)
         return response
 
 
 class LogoutView(APIView):
     def post(self, request):
         response = Response()
-        response.delete_cookie('jwt')
+        response.headers.pop('jwt')
+        # response.delete_cookie('jwt')
         response.data = {'message': 'success'}
         return response

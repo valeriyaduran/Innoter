@@ -6,6 +6,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    volumes:
+      - my-app:/app
 
   db:
     image: postgres
@@ -13,3 +15,8 @@ services:
       - "5432:5432"
     env_file:
       - .env.dev
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+volumes:
+  postgres_volume:
+  my-app:
