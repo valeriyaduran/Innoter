@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from accounts.views import UserViewSet, UserRequestsViewSet
+from accounts.views import UserFollowersViewSet, UserRequestsViewSet
 from innoapp.views import PageViewSet, PostViewSet, TagViewSet
 
 from rest_framework_nested import routers
@@ -28,7 +28,7 @@ post_router.register(r'posts', PostViewSet, basename='page-posts')
 tag_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
 tag_router.register(r'tags', TagViewSet, basename='page-tags')
 follower_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
-follower_router.register(r'followers', UserViewSet, basename='page-followers')
+follower_router.register(r'followers', UserFollowersViewSet, basename='page-followers')
 follow_request_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
 follow_request_router.register(r'follow_requests', UserRequestsViewSet, basename='page-follow_requests')
 

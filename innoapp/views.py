@@ -1,14 +1,14 @@
 from rest_framework import viewsets
 
 from innoapp.models import Page, Post, Tag
-from innoapp.permissions import IsOwnerOrReadOnly
+from innoapp.permissions import IsOwnerOrReadOnly, IsStaffOrDontSeeBlockedUser, IsStaffOrDontSeeBlockedPage
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
 
 
 class PageViewSet(viewsets.ModelViewSet):
     queryset = Page.objects.all()
     serializer_class = PageSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = (IsStaffOrDontSeeBlockedUser, IsStaffOrDontSeeBlockedPage, IsOwnerOrReadOnly)
 
     # @action(methods=['get'], detail=True, serializer_class=PostSerializer)
     # def posts(self, request, pk=None):
@@ -18,13 +18,7 @@ class PageViewSet(viewsets.ModelViewSet):
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
-
-    # def get_current_user(self):
-    #     current_user = Post.objects.filter(
-    #         page__owner=self.request.user.pk
-    #     )
-    #     return current_user
+    permission_classes = (IsStaffOrDontSeeBlockedUser, IsStaffOrDontSeeBlockedPage, IsOwnerOrReadOnly)
 
     def get_queryset(self):
         return Post.objects.filter(page=self.kwargs['page_pk'])
@@ -32,8 +26,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
-
-    # permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = (IsStaffOrDontSeeBlockedUser, IsStaffOrDontSeeBlockedPage, IsOwnerOrReadOnly)
 
     def get_queryset(self):
         return Tag.objects.filter(pages=self.kwargs['page_pk'])
