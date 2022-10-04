@@ -1,10 +1,11 @@
 from rest_framework import viewsets
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.serializers import UserSerializer
 from accounts.generate_token import CustomTokenGenerator
+from accounts.services.check_login import CheckLogin
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -27,17 +28,7 @@ class RegisterViewSet(viewsets.ModelViewSet):
 
 class LoginViewSet(viewsets.ModelViewSet):
     def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
-
-        try:
-            user = User.objects.get(email=email)
-        except Exception:
-            raise AuthenticationFailed('User not found!')
-
-        if user.password != password:
-            raise AuthenticationFailed('Incorrect password!')
-
+        CheckLogin.check_login(request)
         response = Response()
         response.headers = {'jwt': CustomTokenGenerator.generate_token(request)}
         return response
