@@ -10,11 +10,6 @@ class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
     permission_classes = (IsStaffOrDontSeeBlockedUser, IsStaffOrDontSeeBlockedPage, IsOwnerOrReadOnly)
 
-    # @action(methods=['get'], detail=True, serializer_class=PostSerializer)
-    # def posts(self, request, pk=None):
-    #     posts = Post.objects.filter(page=pk).values()
-    #     return Response(posts)
-
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer

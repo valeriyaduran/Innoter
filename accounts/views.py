@@ -1,12 +1,18 @@
-from rest_framework import viewsets
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from accounts.models import User
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, UserRegisterSerializer
+from accounts.serializers import UserSerializer, UserRegisterSerializer
 from innoapp.permissions import IsStaffOrDontSeeBlockedUser, IsStaffOrDontSeeBlockedPage, IsOwnerOrReadOnly
 from accounts.generate_token import CustomTokenGenerator
+from accounts.services.check_login import CheckLogin
+
+
+class UserFollowersViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
 
 
 class UserFollowersViewSet(viewsets.ModelViewSet):
@@ -25,37 +31,34 @@ class UserRequestsViewSet(viewsets.ModelViewSet):
         return User.objects.filter(requests=self.kwargs['page_pk'])
 
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
+class AuthViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    @action(methods=['post'], detail=False)
+    def register(self, request):
+        serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        User.objects.create(**serializer.validated_data)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
-
-class LoginView(APIView):
-    def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
-
-        try:
-            user = User.objects.get(email=email)
-        except Exception:
-            raise AuthenticationFailed('User not found!')
-
-        if user.password != password:
-            raise AuthenticationFailed('Incorrect password!')
-
+    @action(methods=['post'], detail=False)
+    def login(self, request):
+        # serializer = UserLoginSerializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # print("****", serializer.is_valid())
+        # email = serializer.validated_data['email']
+        # print("email:", email)
+        # password = serializer.validated_data['password']
+        # print("password:",password)
+        CheckLogin.check_login(request)
         response = Response()
         response.headers = {'jwt': CustomTokenGenerator.generate_token(request)}
-        # response.set_cookie(key='jwt', value=CustomTokenGenerator.generate_token(request), httponly=True)
         return response
 
-
-class LogoutView(APIView):
-    def post(self, request):
+    @action(methods=['post'], detail=False)
+    def logout(self, request):
         response = Response()
         response.headers.pop('jwt')
-        # response.delete_cookie('jwt')
         response.data = {'message': 'success'}
         return response
