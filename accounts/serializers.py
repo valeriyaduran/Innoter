@@ -42,3 +42,7 @@ class UserRequestsSerializer(serializers.ModelSerializer):
         if username in User.objects.all():
             return username
         raise serializers.ValidationError("This user is not registered to send the request!")
+
+    def update(self, instance, validated_data):
+        instance.follow_requests = validated_data.get('username', instance.username)
+        return instance

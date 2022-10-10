@@ -1,5 +1,7 @@
 import jwt
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
 
 from accounts.models import User
 from innoapp.models import Page, Post, Tag
@@ -16,7 +18,10 @@ class PageViewSet(viewsets.ModelViewSet):
         return user_id
 
     def perform_create(self, serializer):
-        serializer.save(owner=User.objects.get(pk=self.get_user_id(self.request)))
+        try:
+            Page.objects.get(owner=User.objects.get(pk=self.get_user_id(self.request)))
+        except ObjectDoesNotExist:
+            serializer.save(owner=User.objects.get(pk=self.get_user_id(self.request)))
 
     def perform_update(self, serializer):
         serializer.save(owner=User.objects.get(pk=self.get_user_id(self.request)))
@@ -29,13 +34,15 @@ class PostViewSet(viewsets.ModelViewSet):
         return Post.objects.filter(page=self.kwargs['page_pk'])
 
     def perform_create(self, serializer):
-        serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+        try:
+            page = Page.objects.get(pk=self.kwargs['page_pk'])
+        except ObjectDoesNotExist:
+            raise ValidationError("No page by URL provided")
+        if page:
+            serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -45,7 +52,9 @@ class TagViewSet(viewsets.ModelViewSet):
         return Tag.objects.filter(pages=self.kwargs['page_pk'])
 
     def perform_create(self, serializer):
-        serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
-
-    def perform_destroy(self, instance):
-        instance.delete()
+        try:
+            page = Page.objects.get(pk=self.kwargs['page_pk'])
+        except ObjectDoesNotExist:
+            raise ValidationError("No page by URL provided")
+        if page:
+            serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
