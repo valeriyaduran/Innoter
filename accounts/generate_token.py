@@ -8,7 +8,7 @@ from innotter import settings
 class CustomTokenGenerator:
     @staticmethod
     def generate_token(request):
-        user = User.objects.get(email=request.data['email'])
+        user = User.objects.get(email=request.data.get('email'))
 
         payload = {
             'user_id': user.pk,

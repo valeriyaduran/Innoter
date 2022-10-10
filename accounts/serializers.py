@@ -1,8 +1,6 @@
 from rest_framework import serializers
 import re
 
-from rest_framework.exceptions import PermissionDenied
-
 from accounts.models import User
 
 
@@ -36,7 +34,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 
 class UserRequestsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ["username"]
