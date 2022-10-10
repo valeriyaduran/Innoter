@@ -30,7 +30,7 @@ tag_router.register(r'tags', TagViewSet, basename='page-tags')
 follower_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
 follower_router.register(r'followers', UserFollowersViewSet, basename='page-followers')
 follow_request_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
-follow_request_router.register(r'follow_requests', UserRequestsViewSet, basename='page-follow_requests')
+follow_request_router.register(r'follow-requests', UserRequestsViewSet, basename='page-follow_requests')
 
 router = routers.SimpleRouter()
 router.register(r'auth', AuthViewSet, basename='register')
@@ -42,5 +42,6 @@ urlpatterns = [
     path("api/v1/", include(post_router.urls)),
     path("api/v1/", include(tag_router.urls)),
     path("api/v1/", include(follower_router.urls)),
+    path("api/v1/", include(follow_request_router.urls)),
     path("api/v1/", include(router.urls))
 ]

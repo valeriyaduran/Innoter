@@ -1,4 +1,7 @@
 from rest_framework import serializers
+import re
+
+from rest_framework.exceptions import PermissionDenied
 
 from accounts.models import User
 
@@ -16,20 +19,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ("email", "username", "password", "image_s3_path", "role", "is_blocked")
         extra_kwargs = {'password': {'write_only': True}}
 
-    # def create(self, validated_data):
-    #     print("********")
-    #     print(self.validated_data)
-    #     # print("Hello!!!!")
-    #     # user = User(
-    #     #     email=validated_data['email'],
-    #     #     username=validated_data['username'],
-    #     #     image_s3_path=validated_data['image_s3_path'],
-    #     #     role=validated_data['role'],
-    #     #     is_blocked=validated_data['is_blocked']
-    #     # )
-    #     # user.set_password(validated_data['password'])
-    #     # user.save()
-    #     return User.objects.create(**validated_data)
+    def validate_email(self, email):
+        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+        if not re.search(regex, email):
+            raise serializers.ValidationError("Incorrect email! Email format must be like 'xxx@xx.xx'")
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("User with this email already exists!")
+        return email
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
@@ -37,3 +33,15 @@ class UserLoginSerializer(serializers.ModelSerializer):
         model = User
         fields = ("email", "password")
         extra_kwargs = {'password': {'write_only': True}}
+
+
+class UserRequestsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["username"]
+
+    def validate_username(self, username):
+        if username in User.objects.all():
+            return username
+        raise serializers.ValidationError("This user is not registered to send the request!")

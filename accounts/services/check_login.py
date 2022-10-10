@@ -1,15 +1,11 @@
-from rest_framework.exceptions import AuthenticationFailed, NotFound
-from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
 
-from accounts.generate_token import CustomTokenGenerator
 from accounts.models import User
 
 
 class CheckLogin:
     @staticmethod
-    def check_login(request):
-        email = request.data['email']
-        password = request.data['password']
+    def check_login(email, password):
         try:
             user = User.objects.get(email=email)
         except Exception:
@@ -17,4 +13,5 @@ class CheckLogin:
 
         if user.password != password:
             raise AuthenticationFailed('Incorrect password!')
+
 

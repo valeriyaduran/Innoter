@@ -14,12 +14,15 @@ class PageSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
+    page = PageSerializer(read_only=True)
+
     class Meta:
         model = Post
         fields = ("page", "content", "reply_to", "created_at", "updated_at")
 
 
 class TagSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Tag
-        fields = ['name']
+        fields = ["name"]

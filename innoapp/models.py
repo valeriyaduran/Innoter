@@ -11,7 +11,7 @@ class Page(models.Model):
     name = models.CharField(max_length=80)
     uuid = models.CharField(max_length=30, unique=True)
     description = models.TextField(blank=True)
-    tags = models.ManyToManyField(Tag, related_name='pages')
+    tags = models.ManyToManyField(Tag, related_name='pages', blank=True)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='page')
     followers = models.ManyToManyField(User, related_name='follows', blank=True)
     image = models.URLField(null=True, blank=True)
@@ -27,3 +27,4 @@ class Post(models.Model):
                                  blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+

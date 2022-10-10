@@ -1,5 +1,10 @@
 import jwt
-from rest_framework.exceptions import AuthenticationFailed
+from django.http import HttpResponseForbidden
+from jwt import ExpiredSignatureError
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.response import Response
+
 from innotter import settings
 
 
@@ -12,12 +17,16 @@ class JWTAuthMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if request.user.is_authenticated:
+        try:
             token = request.headers.get('jwt')
-            if not token:
-                raise AuthenticationFailed('Unauthenticated!')
+        except Exception:
+            raise AuthenticationFailed('Unauthenticated!', status.HTTP_401_UNAUTHORIZED)
+        if token:
             try:
                 jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             except jwt.ExpiredSignatureError:
-                raise AuthenticationFailed('Unauthenticated!')
+                return HttpResponseForbidden("Invalid signature or signature has expired")
+
+        elif request.path != '/api/v1/auth/register/' and request.path != '/api/v1/auth/login/':
+            return HttpResponseForbidden('You are not allowed to perform this action! Please, login before.')
 
