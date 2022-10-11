@@ -33,7 +33,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
 
-class UserRequestsSerializer(serializers.ModelSerializer):
+class UserFollowersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username"]
@@ -43,6 +43,3 @@ class UserRequestsSerializer(serializers.ModelSerializer):
             return username
         raise serializers.ValidationError("This user is not registered to send the request!")
 
-    def update(self, instance, validated_data):
-        instance.follow_requests = validated_data.get('username', instance.username)
-        return instance

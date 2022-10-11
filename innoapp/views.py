@@ -1,30 +1,25 @@
-import jwt
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import User
+from accounts.services.get_user_id import GetUserId
 from innoapp.models import Page, Post, Tag
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
-from innotter import settings
 
 
 class PageViewSet(viewsets.ModelViewSet):
     queryset = Page.objects.all()
     serializer_class = PageSerializer
 
-    def get_user_id(self, request):
-        user_id = jwt.decode(request.headers['jwt'], settings.SECRET_KEY, algorithms=["HS256"])['user_id']
-        return user_id
-
     def perform_create(self, serializer):
         try:
-            Page.objects.get(owner=User.objects.get(pk=self.get_user_id(self.request)))
+            Page.objects.get(owner=User.objects.get(pk=GetUserId.get_user_id(self.request)))
         except ObjectDoesNotExist:
-            serializer.save(owner=User.objects.get(pk=self.get_user_id(self.request)))
+            serializer.save(owner=User.objects.get(pk=GetUserId.get_user_id(self.request)))
 
     def perform_update(self, serializer):
-        serializer.save(owner=User.objects.get(pk=self.get_user_id(self.request)))
+        serializer.save(owner=User.objects.get(pk=GetUserId.get_user_id(self.request)))
 
 
 class PostViewSet(viewsets.ModelViewSet):
