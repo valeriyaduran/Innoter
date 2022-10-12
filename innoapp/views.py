@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import User
-from accounts.services.get_user_id import GetUserId
+from accounts.services.user_service import UserService
 from innoapp.models import Page, Post, Tag
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
 
@@ -14,12 +14,12 @@ class PageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         try:
-            Page.objects.get(owner=User.objects.get(pk=GetUserId.get_user_id(self.request)))
+            Page.objects.get(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
         except ObjectDoesNotExist:
-            serializer.save(owner=User.objects.get(pk=GetUserId.get_user_id(self.request)))
+            serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
 
     def perform_update(self, serializer):
-        serializer.save(owner=User.objects.get(pk=GetUserId.get_user_id(self.request)))
+        serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
 
 
 class PostViewSet(viewsets.ModelViewSet):

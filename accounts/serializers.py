@@ -2,6 +2,7 @@ from rest_framework import serializers
 import re
 
 from accounts.models import User
+from innoapp.models import Page
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,3 +44,16 @@ class UserFollowersSerializer(serializers.ModelSerializer):
             return username
         raise serializers.ValidationError("This user is not registered to send the request!")
 
+
+class MyFollowersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Page
+        fields = ["followers"]
+
+
+class FollowRequestsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Page
+        fields = ["follow_requests"]
