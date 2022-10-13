@@ -20,7 +20,7 @@ from innoapp.views import PageViewSet, PostViewSet, TagViewSet
 from rest_framework_nested import routers
 
 page_router = routers.SimpleRouter()
-page_router.register(r'pages', PageViewSet)
+page_router.register(r'pages', PageViewSet, basename='pages')
 post_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
 post_router.register(r'posts', PostViewSet, basename='page-posts')
 tag_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
