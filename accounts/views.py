@@ -33,7 +33,6 @@ class UserFollowersViewSet(viewsets.ModelViewSet):
     def send_follow_requests(self, request):
         UserService.compare_current_and_requested_users(request)
         user_page = UserService.get_user_page_to_follow(request)
-        user_page = UserService.get_user_page_to_follow(request)
         current_user = User.objects.get(pk=UserService.get_user_id(request))
 
         if user_page.is_private:
