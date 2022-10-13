@@ -30,13 +30,15 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        my_page = UserService.get_user_id(self.request)
+        my_page = UserService.get_current_page(self.request)
+        print(my_page.pk)
+        print(self.kwargs['page_pk'])
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to see the posts of this page!")
         return Post.objects.filter(page=self.kwargs['page_pk'])
 
     def perform_create(self, serializer):
-        my_page = UserService.get_user_id(self.request)
+        my_page = UserService.get_current_page(self.request)
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to create posts for this page!")
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
@@ -49,13 +51,13 @@ class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
 
     def get_queryset(self):
-        my_page = UserService.get_user_id(self.request)
+        my_page = UserService.get_current_page(self.request)
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to see the tags of this page!")
         return Tag.objects.filter(pages=self.kwargs['page_pk'])
 
     def perform_create(self, serializer):
-        my_page = UserService.get_user_id(self.request)
+        my_page = UserService.get_current_page(self.request)
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to create tags for this page!")
         serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
