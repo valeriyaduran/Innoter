@@ -1,6 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.services.user_service import UserService
@@ -43,6 +45,18 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+
+
+class PostReplyViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+
+    def perform_create(self, serializer):
+        page_for_post_reply = Page.objects.get(posts=self.request.data.get("reply_to"))
+        if not page_for_post_reply.is_private or \
+                UserService.get_user_id(self.request) in [follower.pk for follower in
+                                                          page_for_post_reply.followers.filter()] or \
+                UserService.get_user_id(self.request) == page_for_post_reply.owner.pk:
+            serializer.save(page=page_for_post_reply)
 
 
 class TagViewSet(viewsets.ModelViewSet):
