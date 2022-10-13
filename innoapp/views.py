@@ -1,6 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.services.user_service import UserService
@@ -33,11 +35,36 @@ class PostViewSet(viewsets.ModelViewSet):
             page = Page.objects.get(pk=self.kwargs['page_pk'])
         except ObjectDoesNotExist:
             raise ValidationError("No page by URL provided")
+        print(self.kwargs)
         if page:
             serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+
+
+class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        posts = Post.objects.filter(liked_by=UserService.get_user_id(self.request))
+        return posts
+
+
+class PostLikesViewSet(viewsets.ModelViewSet):
+
+    @action(methods=['post'], detail=False)
+    def like(self, request):
+        try:
+            user_post = Post.objects.get(pk=request.data.get("post"))
+        except ObjectDoesNotExist:
+            raise ValidationError("Post does not exist!")
+        if user_post.liked_by.filter(pk=UserService.get_user_id(request)).exists():
+            user_post.liked_by.remove(UserService.get_user_id(request))
+        else:
+            user_post.liked_by.add(UserService.get_user_id(request))
+        serializer = PostSerializer(user_post)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TagViewSet(viewsets.ModelViewSet):

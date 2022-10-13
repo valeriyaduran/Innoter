@@ -18,7 +18,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ("pk", "page", "content", "reply_to", "created_at", "updated_at")
+        fields = ("pk", "page", "content", "reply_to", "created_at", "updated_at", "liked_by")
 
 
 class TagSerializer(serializers.ModelSerializer):

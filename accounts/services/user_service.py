@@ -18,6 +18,14 @@ class UserService:
         return user_id
 
     @staticmethod
+    def get_usernames(request):
+        try:
+            usernames = request.data.get('username')
+        except ObjectDoesNotExist:
+            raise ValidationError("No username provided")
+        return usernames
+
+    @staticmethod
     def compare_current_and_requested_users(request):
         current_user = UserService.get_user_id(request)
         try:
@@ -44,11 +52,3 @@ class UserService:
         except ObjectDoesNotExist:
             raise ValidationError("No page by URL provided")
         return page
-
-    @staticmethod
-    def get_usernames(request):
-        try:
-            usernames = request.data.get('username')
-        except ObjectDoesNotExist:
-            raise ValidationError("No username provided")
-        return usernames
