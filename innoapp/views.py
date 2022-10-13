@@ -31,8 +31,6 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         my_page = UserService.get_current_page(self.request)
-        print(my_page.pk)
-        print(self.kwargs['page_pk'])
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to see the posts of this page!")
         return Post.objects.filter(page=self.kwargs['page_pk'])
