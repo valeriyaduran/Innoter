@@ -16,6 +16,7 @@ Including another URLconf
 from django.urls import path, include
 
 from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostReplyViewSet
+from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostLikesViewSet, PostsWithMyLikesViewSet
 
 from rest_framework_nested import routers
 
@@ -25,6 +26,9 @@ post_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
 post_router.register(r'posts', PostViewSet, basename='page-posts')
 tag_router = routers.NestedSimpleRouter(page_router, r'pages', lookup='page')
 tag_router.register(r'tags', TagViewSet, basename='page-tags')
+router = routers.SimpleRouter()
+router.register(r'post', PostLikesViewSet, basename='post-likes')
+router.register(r'posts_with_my_likes', PostsWithMyLikesViewSet, basename='liked-posts')
 router = routers.SimpleRouter()
 router.register(r'send_post_reply', PostReplyViewSet, basename='post-reply')
 

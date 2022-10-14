@@ -59,6 +59,30 @@ class PostReplyViewSet(viewsets.ModelViewSet):
             serializer.save(page=page_for_post_reply)
 
 
+class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        posts = Post.objects.filter(liked_by=UserService.get_user_id(self.request))
+        return posts
+
+
+class PostLikesViewSet(viewsets.ModelViewSet):
+
+    @action(methods=['post'], detail=False)
+    def like(self, request):
+        try:
+            user_post = Post.objects.get(pk=request.data.get("post"))
+        except ObjectDoesNotExist:
+            raise ValidationError("Post does not exist!")
+        if user_post.liked_by.filter(pk=UserService.get_user_id(request)).exists():
+            user_post.liked_by.remove(UserService.get_user_id(request))
+        else:
+            user_post.liked_by.add(UserService.get_user_id(request))
+        serializer = PostSerializer(user_post)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
 

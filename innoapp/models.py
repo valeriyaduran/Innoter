@@ -27,4 +27,4 @@ class Post(models.Model):
                                  blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    liked_by = models.ManyToManyField(User, related_name='posts', blank=True)
