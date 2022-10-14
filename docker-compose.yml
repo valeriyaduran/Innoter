@@ -6,14 +6,17 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    volumes:
+      - .:/app
 
   db:
     image: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     env_file:
       - .env.dev
     volumes:
-      - my-datavolume:/var/lib/postgres
+      - postgres_volume:/var/lib/postgresql/data
+
 volumes:
-  my-datavolume:
+  postgres_volume:

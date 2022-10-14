@@ -8,8 +8,10 @@ class User(AbstractUser):
         MODERATOR = 'moderator'
         ADMIN = 'admin'
 
-    email = models.EmailField(unique=True)
+    email = models.CharField(max_length=50)
+    password = models.CharField(max_length=50)
+    username = models.CharField(max_length=50, unique=True)
     image_s3_path = models.CharField(max_length=200, null=True, blank=True)
     role = models.CharField(max_length=9, choices=Roles.choices)
-    title = models.CharField(max_length=80)
     is_blocked = models.BooleanField(default=False)
+
