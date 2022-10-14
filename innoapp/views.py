@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -97,3 +99,16 @@ class TagViewSet(viewsets.ModelViewSet):
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to create tags for this page!")
         serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
+
+
+class FeedViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        today = datetime.now().date()
+        my_posts = Post.objects.filter(page__owner__pk=UserService.get_user_id(self.request)).filter(
+            created_at__contains=today)
+        followed_pages_posts = Post.objects.filter(page__followers=UserService.get_user_id(self.request)).filter(
+            created_at__contains=today)
+        all_posts = my_posts | followed_pages_posts
+        return all_posts
