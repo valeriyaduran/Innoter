@@ -51,12 +51,14 @@ class PostReplyViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
 
     def perform_create(self, serializer):
-        page_for_post_reply = Page.objects.get(posts=self.request.data.get("reply_to"))
-        if not page_for_post_reply.is_private or \
-                UserService.get_user_id(self.request) in [follower.pk for follower in
-                                                          page_for_post_reply.followers.filter()] or \
-                UserService.get_user_id(self.request) == page_for_post_reply.owner.pk:
+        try:
+            page_for_post_reply = Page.objects.get(posts=self.request.data.get("reply_to"))
+        except ObjectDoesNotExist:
+            raise ValidationError("Page does not exist!")
+        if UserService.check_page_restrictions(self.request, page_for_post_reply):
             serializer.save(page=page_for_post_reply)
+        else:
+            raise ValidationError("You don't have a permission to send the reply!")
 
 
 class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
@@ -75,10 +77,17 @@ class PostLikesViewSet(viewsets.ModelViewSet):
             user_post = Post.objects.get(pk=request.data.get("post"))
         except ObjectDoesNotExist:
             raise ValidationError("Post does not exist!")
-        if user_post.liked_by.filter(pk=UserService.get_user_id(request)).exists():
-            user_post.liked_by.remove(UserService.get_user_id(request))
+        try:
+            page_for_post_like = Page.objects.get(posts=user_post)
+        except ObjectDoesNotExist:
+            raise ValidationError("Page does not exist!")
+        if UserService.check_page_restrictions(request, page_for_post_like):
+            if user_post.liked_by.filter(pk=UserService.get_user_id(request)).exists():
+                user_post.liked_by.remove(UserService.get_user_id(request))
+            else:
+                user_post.liked_by.add(UserService.get_user_id(request))
         else:
-            user_post.liked_by.add(UserService.get_user_id(request))
+            raise ValidationError("You don't have a permission to like the post!")
         serializer = PostSerializer(user_post)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
