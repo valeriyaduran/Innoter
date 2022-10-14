@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -100,3 +100,10 @@ class AuthViewSet(viewsets.ModelViewSet):
         response.headers.pop('jwt')
         response.data = {'message': 'success'}
         return response
+
+
+class UserSearchViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username']

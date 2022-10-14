@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -97,3 +97,10 @@ class TagViewSet(viewsets.ModelViewSet):
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to create tags for this page!")
         serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
+
+
+class PageSearchViewSet(viewsets.ModelViewSet):
+    queryset = Page.objects.all()
+    serializer_class = PageSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'uuid', 'tags__name']
