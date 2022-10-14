@@ -29,7 +29,6 @@ tag_router.register(r'tags', TagViewSet, basename='page-tags')
 router = routers.SimpleRouter()
 router.register(r'post', PostLikesViewSet, basename='post-likes')
 router.register(r'posts_with_my_likes', PostsWithMyLikesViewSet, basename='liked-posts')
-router = routers.SimpleRouter()
 router.register(r'send_post_reply', PostReplyViewSet, basename='post-reply')
 
 
