@@ -15,12 +15,12 @@ class UserSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email", "username", "password", "image_s3_path")
+        fields = ("email", "username", "password", "image_s3_path", "role")
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, attrs):
         for item in attrs:
-            if ' ' in attrs[item]:
+            if re.search(r'\s', attrs[item]):
                 raise serializers.ValidationError("Spaces are not allowed in fields!")
         return attrs
 
@@ -52,14 +52,12 @@ class UserFollowersSerializer(serializers.ModelSerializer):
 
 
 class MyFollowersSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Page
         fields = ["followers"]
 
 
 class FollowRequestsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Page
         fields = ["follow_requests"]

@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 
 from innoapp.models import Page, Post, Tag
@@ -13,8 +15,10 @@ class PageSerializer(serializers.ModelSerializer):
                   "unblock_date")
 
     def validate(self, attrs):
-        if ' ' in attrs['name'] or ' ' in attrs['uuid']:
-            raise serializers.ValidationError("Spaces are not allowed in fields!")
+        to_check_spaces = (attrs["name"], str(attrs["is_private"]))
+        for item in to_check_spaces:
+                if re.search(r'\s', item):
+                    raise serializers.ValidationError("Spaces are not allowed in fields!")
         return attrs
 
 
