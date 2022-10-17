@@ -1,6 +1,7 @@
 import os
 from os.path import join
 
+from django.contrib.auth.hashers import make_password
 from dotenv import load_dotenv
 from rest_framework.exceptions import AuthenticationFailed
 import datetime

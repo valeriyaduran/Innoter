@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from accounts.models import User
 from accounts.services.user_service import UserService
 from innoapp.models import Page, Post, Tag
+from innoapp.permissions import IsAdminModeratorOrForbidden
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
 
 
@@ -14,7 +15,11 @@ class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
 
     def get_queryset(self):
-        return Page.objects.filter(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
+        if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser or User.objects.get(
+                pk=UserService.get_user_id(self.request)).role == 'moderator':
+            return Page.objects.all()
+        else:
+            return Page.objects.filter(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
 
     def perform_create(self, serializer):
         try:
@@ -26,6 +31,16 @@ class PageViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
+
+
+class BlockPageByStaffViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminModeratorOrForbidden, )
+
+    @action(methods=['post'], detail=False)
+    def block_page(self, request):
+        page_to_block = UserService.set_unblock_date(request)
+        serializer = PageSerializer(page_to_block)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PostViewSet(viewsets.ModelViewSet):

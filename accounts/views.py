@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from accounts.models import User
@@ -32,7 +33,7 @@ class UserFollowersViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False)
     def send_follow_requests(self, request):
         UserService.compare_current_and_requested_users(request)
-        user_page = UserService.get_user_page_to_follow(request)
+        user_page = UserService.get_user_page(request)
         current_user = User.objects.get(pk=UserService.get_user_id(request))
 
         if user_page.is_private:
@@ -100,3 +101,18 @@ class AuthViewSet(viewsets.ModelViewSet):
         response.headers.pop('jwt')
         response.data = {'message': 'success'}
         return response
+
+
+class BlockUserByAdminViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser, )
+
+    @action(methods=['post'], detail=False)
+    def block_user(self, request):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        usernames = UserService.get_usernames(request)
+        if usernames:
+            for username in usernames:
+                user = User.objects.get(username=username)
+                user.is_blocked = True
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)

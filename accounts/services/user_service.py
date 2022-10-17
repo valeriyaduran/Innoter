@@ -1,3 +1,5 @@
+import datetime
+
 import jwt
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
@@ -38,7 +40,7 @@ class UserService:
             raise ValidationError("You are not able to follow or accept yourself as a follower of your own page ")
 
     @staticmethod
-    def get_user_page_to_follow(request):
+    def get_user_page(request):
         try:
             page = Page.objects.get(owner=User.objects.get(username=request.data.get("username")))
         except ObjectDoesNotExist:
@@ -52,3 +54,14 @@ class UserService:
         except ObjectDoesNotExist:
             raise ValidationError("No page by URL provided")
         return page
+
+    @staticmethod
+    def set_unblock_date(request):
+        page_to_block = UserService.get_user_page(request)
+        unblock_datetime = request.data.get('unblock_date')
+        if datetime.datetime.now().date() > unblock_datetime.date():
+            page_to_block.unblock_date = unblock_datetime
+        else:
+            raise ValidationError("Unblock date must be later than today")
+        return page_to_block
+
