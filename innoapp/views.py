@@ -15,8 +15,7 @@ class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
 
     def get_queryset(self):
-        if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser or User.objects.get(
-                pk=UserService.get_user_id(self.request)).role == 'moderator':
+        if User.objects.get(pk=UserService.get_user_id(self.request)).role in ('admin', 'moderator'):
             return Page.objects.all()
         else:
             return Page.objects.filter(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
@@ -34,7 +33,7 @@ class PageViewSet(viewsets.ModelViewSet):
 
 
 class BlockPageByStaffViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminModeratorOrForbidden, )
+    permission_classes = (IsAdminModeratorOrForbidden,)
 
     @action(methods=['post'], detail=False)
     def block_page(self, request):
@@ -60,6 +59,11 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+
+    def perform_destroy(self, instance):
+        if User.objects.get(pk=UserService.get_user_id(self.request)).role in (
+                'admin', 'moderator') or UserService.get_current_page(self.request).pk == self.kwargs['page_pk']:
+            instance.delete()
 
 
 class PostReplyViewSet(viewsets.ModelViewSet):
