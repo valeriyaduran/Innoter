@@ -57,3 +57,10 @@ class FollowRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = ["follow_requests"]
+
+
+class BlockUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "is_blocked"]
+

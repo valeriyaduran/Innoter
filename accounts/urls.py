@@ -23,7 +23,7 @@ from rest_framework_nested import routers
 router = routers.SimpleRouter()
 router.register(r'auth', AuthViewSet, basename='register')
 router.register(r'page', UserFollowersViewSet, basename='page-followers')
-router.register(r'block_user', BlockUserByAdminViewSet, basename='block-user')
+router.register(r'users', BlockUserByAdminViewSet, basename='block-user')
 
 
 urlpatterns = [

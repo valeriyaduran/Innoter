@@ -15,7 +15,7 @@ class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
 
     def get_queryset(self):
-        if User.objects.get(pk=UserService.get_user_id(self.request)).role in ('admin', 'moderator'):
+        if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser:
             return Page.objects.all()
         else:
             return Page.objects.filter(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
@@ -33,9 +33,9 @@ class PageViewSet(viewsets.ModelViewSet):
 
 
 class BlockPageByStaffViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminModeratorOrForbidden,)
+    permission_classes = [IsAdminModeratorOrForbidden]
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['put'], detail=False)
     def block_page(self, request):
         page_to_block = UserService.set_unblock_date(request)
         serializer = PageSerializer(page_to_block)

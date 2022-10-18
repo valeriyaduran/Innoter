@@ -1,5 +1,5 @@
 import datetime
-
+from dateutil import parser
 import jwt
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
@@ -58,9 +58,11 @@ class UserService:
     @staticmethod
     def set_unblock_date(request):
         page_to_block = UserService.get_user_page(request)
-        unblock_datetime = request.data.get('unblock_date')
-        if datetime.datetime.now().date() > unblock_datetime.date():
-            page_to_block.unblock_date = unblock_datetime
+        unblock_date = request.data.get('unblock_date')
+        parsed_date = parser.parse(unblock_date)
+        if datetime.datetime.now() < parsed_date:
+            page_to_block.unblock_date = parsed_date
+            page_to_block.save()
         else:
             raise ValidationError("Unblock date must be later than today")
         return page_to_block

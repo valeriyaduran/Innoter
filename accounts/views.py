@@ -1,18 +1,19 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from accounts.models import User
+from accounts.permissions import IsAdminOrForbidden
 from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLoginSerializer, \
-    MyFollowersSerializer, FollowRequestsSerializer
+    MyFollowersSerializer, FollowRequestsSerializer, BlockUserSerializer
 from accounts.services.auth_service import AuthService
 from accounts.services.user_service import UserService
 from innoapp.serializers import PageSerializer
 
 
 class UserFollowersViewSet(viewsets.ModelViewSet):
-
     serializer_classes = {
         'send_follow_requests': FollowRequestsSerializer,
         'my_followers': MyFollowersSerializer,
@@ -104,15 +105,18 @@ class AuthViewSet(viewsets.ModelViewSet):
 
 
 class BlockUserByAdminViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminUser, )
+    permission_classes = [IsAdminOrForbidden]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['put'], detail=False)
     def block_user(self, request):
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        usernames = UserService.get_usernames(request)
-        if usernames:
-            for username in usernames:
-                user = User.objects.get(username=username)
-                user.is_blocked = True
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        try:
+            requested_user = User.objects.get(username=request.data.get("username"))
+        except ObjectDoesNotExist:
+            raise ValidationError("User does not exist!")
+        requested_user.is_blocked = True
+        requested_user.save()
+        serializer = BlockUserSerializer(requested_user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

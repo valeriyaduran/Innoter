@@ -13,6 +13,7 @@ djangorestframework = "*"
 drf-nested-routers = "*"
 install = "*"
 pyjwt = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

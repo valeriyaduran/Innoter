@@ -30,7 +30,7 @@ router = routers.SimpleRouter()
 router.register(r'post', PostLikesViewSet, basename='post-likes')
 router.register(r'posts_with_my_likes', PostsWithMyLikesViewSet, basename='liked-posts')
 router.register(r'send_post_reply', PostReplyViewSet, basename='post-reply')
-router.register(r'block_page', BlockPageByStaffViewSet, basename='block-page')
+router.register(r'user_pages', BlockPageByStaffViewSet, basename='block-page')
 
 urlpatterns = [
     path("api/v1/", include(page_router.urls)),
