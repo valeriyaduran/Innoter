@@ -19,6 +19,9 @@ class AuthService:
             user = User.objects.get(email=email)
         except Exception:
             raise AuthenticationFailed('User not found!')
+        if user.is_blocked:
+            raise AuthenticationFailed('Impossible to login, because user was blocked!')
+
         if user.is_superuser:
             if not check_password(password, user.password):
                 raise AuthenticationFailed('Incorrect password!')

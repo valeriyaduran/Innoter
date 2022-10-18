@@ -3,6 +3,7 @@ from rest_framework import permissions
 
 from accounts.models import User
 from accounts.services.user_service import UserService
+from innoapp.models import Page
 
 
 class IsAdminModeratorOrForbidden(permissions.BasePermission):
