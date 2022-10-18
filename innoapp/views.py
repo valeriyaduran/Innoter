@@ -109,6 +109,6 @@ class FeedViewSet(viewsets.ModelViewSet):
         my_posts = Post.objects.filter(page__owner__pk=UserService.get_user_id(self.request)).filter(
             created_at__contains=today)
         followed_pages_posts = Post.objects.filter(page__followers=UserService.get_user_id(self.request)).filter(
-            created_at__contains=today)
+            created_at__contains=today).filter(page__owner__is_blocked=False)
         all_posts = my_posts | followed_pages_posts
         return all_posts
