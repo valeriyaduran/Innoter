@@ -10,10 +10,13 @@ from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLog
     MyFollowersSerializer, FollowRequestsSerializer, BlockUserSerializer
 from accounts.services.auth_service import AuthService
 from accounts.services.user_service import UserService
+from innoapp.permissions import IsStaffOrDontSeeBlockedData
 from innoapp.serializers import PageSerializer
 
 
 class UserFollowersViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffOrDontSeeBlockedData]
+
     serializer_classes = {
         'send_follow_requests': FollowRequestsSerializer,
         'my_followers': MyFollowersSerializer,
@@ -115,7 +118,10 @@ class BlockUserByAdminViewSet(viewsets.ModelViewSet):
             requested_user = User.objects.get(username=request.data.get("username"))
         except ObjectDoesNotExist:
             raise ValidationError("User does not exist!")
-        requested_user.is_blocked = True
+        if requested_user.is_blocked:
+            requested_user.is_blocked = False
+        else:
+            requested_user.is_blocked = True
         requested_user.save()
         serializer = BlockUserSerializer(requested_user)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -17,6 +17,7 @@ class JWTAuthMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        from django.contrib import admin
         try:
             token = request.headers.get('jwt')
         except Exception:
@@ -24,9 +25,9 @@ class JWTAuthMiddleware:
         if token:
             try:
                 jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            except jwt.ExpiredSignatureError:
+            except jwt.DecodeError:
                 return HttpResponseForbidden("Invalid signature or signature has expired")
 
-        elif request.path != '/api/v1/auth/register/' and request.path != '/api/v1/auth/login/':
+        elif request.path not in ('/api/v1/auth/register/', '/api/v1/auth/login/') and not request.path.startswith(
+                '/admin/'):
             return HttpResponseForbidden('You are not allowed to perform this action! Please, login before.')
-

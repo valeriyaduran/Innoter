@@ -7,12 +7,13 @@ from rest_framework.response import Response
 from accounts.models import User
 from accounts.services.user_service import UserService
 from innoapp.models import Page, Post, Tag
-from innoapp.permissions import IsAdminModeratorOrForbidden
+from innoapp.permissions import IsAdminModeratorOrForbidden, IsStaffOrDontSeeBlockedData
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
 
 
 class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
+    permission_classes = [IsStaffOrDontSeeBlockedData]
 
     def get_queryset(self):
         if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser:
@@ -29,6 +30,7 @@ class PageViewSet(viewsets.ModelViewSet):
             serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
 
     def perform_update(self, serializer):
+
         serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
 
 
@@ -44,6 +46,7 @@ class BlockPageByStaffViewSet(viewsets.ModelViewSet):
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
+    permission_classes = [IsStaffOrDontSeeBlockedData]
 
     def get_queryset(self):
         my_page = UserService.get_current_page(self.request)
@@ -61,13 +64,14 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
 
     def perform_destroy(self, instance):
-        if User.objects.get(pk=UserService.get_user_id(self.request)).role in (
-                'admin', 'moderator') or UserService.get_current_page(self.request).pk == self.kwargs['page_pk']:
+        if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser or str(UserService.get_current_page(
+                self.request).pk) == self.kwargs['page_pk']:
             instance.delete()
 
 
 class PostReplyViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
+    permission_classes = [IsStaffOrDontSeeBlockedData]
 
     def perform_create(self, serializer):
         page_for_post_reply = Page.objects.get(posts=self.request.data.get("reply_to"))
@@ -80,6 +84,7 @@ class PostReplyViewSet(viewsets.ModelViewSet):
 
 class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
+    permission_classes = [IsStaffOrDontSeeBlockedData]
 
     def get_queryset(self):
         posts = Post.objects.filter(liked_by=UserService.get_user_id(self.request))
@@ -87,6 +92,7 @@ class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
 
 
 class PostLikesViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffOrDontSeeBlockedData]
 
     @action(methods=['post'], detail=False)
     def like(self, request):
@@ -104,6 +110,7 @@ class PostLikesViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
+    permission_classes = [IsStaffOrDontSeeBlockedData]
 
     def get_queryset(self):
         my_page = UserService.get_current_page(self.request)

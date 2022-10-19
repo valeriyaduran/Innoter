@@ -60,7 +60,7 @@ class UserService:
         page_to_block = UserService.get_user_page(request)
         unblock_date = request.data.get('unblock_date')
         parsed_date = parser.parse(unblock_date)
-        if datetime.datetime.now() < parsed_date:
+        if datetime.datetime.utcnow() < parsed_date:
             page_to_block.unblock_date = parsed_date
             page_to_block.save()
         else:
