@@ -1,9 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from accounts.exceptions.user_exceptions import UsernameNotFound
 from accounts.models import User
 from accounts.permissions import IsAdminOrForbidden
 from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLoginSerializer, \
@@ -117,7 +117,7 @@ class BlockUserByAdminViewSet(viewsets.ModelViewSet):
         try:
             requested_user = User.objects.get(username=request.data.get("username"))
         except ObjectDoesNotExist:
-            raise ValidationError("User does not exist!")
+            raise UsernameNotFound()
         if requested_user.is_blocked:
             requested_user.is_blocked = False
         else:

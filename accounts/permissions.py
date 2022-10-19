@@ -1,6 +1,7 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import permissions
 
+from accounts.exceptions.user_exceptions import CurrentUserNotFound
 from accounts.models import User
 from accounts.services.user_service import UserService
 
@@ -10,6 +11,6 @@ class IsAdminOrForbidden(permissions.BasePermission):
         try:
             current_user = User.objects.get(pk=UserService.get_user_id(request))
         except ObjectDoesNotExist:
-            raise ValidationError("User not found")
+            raise CurrentUserNotFound()
         if current_user.is_superuser:
             return True

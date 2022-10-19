@@ -7,7 +7,7 @@ from django.http import HttpResponseForbidden
 
 from accounts.exceptions.user_exceptions import UsernameNotFound
 from accounts.models import User
-from innoapp.exceptions.page_exceptions import CurrentUserPageNotFound
+from innoapp.exceptions.page_exceptions import CurrentUserPageNotFound, PageToFollowNotFound
 from innoapp.models import Page
 from innotter import settings
 
@@ -46,7 +46,7 @@ class UserService:
         try:
             page = Page.objects.get(owner=User.objects.get(username=request.data.get("username")))
         except ObjectDoesNotExist:
-            raise ValidationError("No page by URL provided")
+            raise PageToFollowNotFound()
         return page
 
     @staticmethod
