@@ -10,12 +10,12 @@ from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLog
     MyFollowersSerializer, FollowRequestsSerializer, BlockUserSerializer
 from accounts.services.auth_service import AuthService
 from accounts.services.user_service import UserService
-from innoapp.permissions import IsStaffOrDontSeeBlockedData
+from innoapp.permissions import IsAdminModeratorOrDontSeeBlockedContent
 from innoapp.serializers import PageSerializer
 
 
 class UserFollowersViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     serializer_classes = {
         'send_follow_requests': FollowRequestsSerializer,

@@ -7,16 +7,16 @@ from rest_framework.response import Response
 from accounts.models import User
 from accounts.services.user_service import UserService
 from innoapp.models import Page, Post, Tag
-from innoapp.permissions import IsAdminModeratorOrForbidden, IsStaffOrDontSeeBlockedData
+from innoapp.permissions import IsAdminModeratorOrForbidden, IsAdminModeratorOrDontSeeBlockedContent
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
 
 
 class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     def get_queryset(self):
-        if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser:
+        if UserService.is_admin_or_moderator(self.request):
             return Page.objects.all()
         else:
             return Page.objects.filter(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
@@ -30,8 +30,7 @@ class PageViewSet(viewsets.ModelViewSet):
             serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
 
     def perform_update(self, serializer):
-
-        serializer.save(owner=User.objects.get(pk=UserService.get_user_id(self.request)))
+        serializer.save(owner=Page.objects.get(pk=int(self.kwargs['pk'])).owner)
 
 
 class BlockPageByStaffViewSet(viewsets.ModelViewSet):
@@ -46,32 +45,38 @@ class BlockPageByStaffViewSet(viewsets.ModelViewSet):
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     def get_queryset(self):
-        my_page = UserService.get_current_page(self.request)
-        if str(my_page.pk) != self.kwargs['page_pk']:
-            raise ValidationError("You don't have a permission to see the posts of this page!")
-        return Post.objects.filter(page=self.kwargs['page_pk'])
+        if UserService.is_admin_or_moderator(self.request):
+            return Post.objects.filter(page=self.kwargs['page_pk'])
+        else:
+            my_page = UserService.get_current_page(self.request)
+            if str(my_page.pk) != self.kwargs['page_pk']:
+                raise ValidationError("You don't have a permission to see the posts of this page!")
+            return Post.objects.filter(page=self.kwargs['page_pk'])
 
     def perform_create(self, serializer):
-        my_page = UserService.get_current_page(self.request)
-        if str(my_page.pk) != self.kwargs['page_pk']:
-            raise ValidationError("You don't have a permission to create posts for this page!")
-        serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+        if UserService.is_admin_or_moderator(self.request):
+            serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+        else:
+            my_page = UserService.get_current_page(self.request)
+            if str(my_page.pk) != self.kwargs['page_pk']:
+                raise ValidationError("You don't have a permission to create posts for this page!")
+            serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
 
     def perform_destroy(self, instance):
-        if User.objects.get(pk=UserService.get_user_id(self.request)).is_superuser or str(UserService.get_current_page(
+        if UserService.is_admin_or_moderator(self.request) or str(UserService.get_current_page(
                 self.request).pk) == self.kwargs['page_pk']:
             instance.delete()
 
 
 class PostReplyViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     def perform_create(self, serializer):
         page_for_post_reply = Page.objects.get(posts=self.request.data.get("reply_to"))
@@ -84,7 +89,7 @@ class PostReplyViewSet(viewsets.ModelViewSet):
 
 class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     def get_queryset(self):
         posts = Post.objects.filter(liked_by=UserService.get_user_id(self.request))
@@ -92,7 +97,7 @@ class PostsWithMyLikesViewSet(viewsets.ModelViewSet):
 
 
 class PostLikesViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     @action(methods=['post'], detail=False)
     def like(self, request):
@@ -110,16 +115,22 @@ class PostLikesViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
-    permission_classes = [IsStaffOrDontSeeBlockedData]
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     def get_queryset(self):
-        my_page = UserService.get_current_page(self.request)
-        if str(my_page.pk) != self.kwargs['page_pk']:
-            raise ValidationError("You don't have a permission to see the tags of this page!")
-        return Tag.objects.filter(pages=self.kwargs['page_pk'])
+        if UserService.is_admin_or_moderator(self.request):
+            return Tag.objects.filter(pages=self.kwargs['page_pk'])
+        else:
+            my_page = UserService.get_current_page(self.request)
+            if str(my_page.pk) != self.kwargs['page_pk']:
+                raise ValidationError("You don't have a permission to see the tags of this page!")
+            return Tag.objects.filter(pages=self.kwargs['page_pk'])
 
     def perform_create(self, serializer):
-        my_page = UserService.get_current_page(self.request)
-        if str(my_page.pk) != self.kwargs['page_pk']:
-            raise ValidationError("You don't have a permission to create tags for this page!")
-        serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
+        if UserService.is_admin_or_moderator(self.request):
+            serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))
+        else:
+            my_page = UserService.get_current_page(self.request)
+            if str(my_page.pk) != self.kwargs['page_pk']:
+                raise ValidationError("You don't have a permission to create tags for this page!")
+            serializer.save(pages=Page.objects.filter(pk=self.kwargs['page_pk']))

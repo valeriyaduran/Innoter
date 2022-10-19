@@ -67,3 +67,8 @@ class UserService:
             raise ValidationError("Unblock date must be later than today")
         return page_to_block
 
+    @staticmethod
+    def is_admin_or_moderator(request):
+        return User.objects.get(pk=UserService.get_user_id(request)).is_superuser or User.objects.get(
+            pk=UserService.get_user_id(request)).role == 'moderator'
+
