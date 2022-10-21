@@ -125,4 +125,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = 'accounts.User'
 
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 

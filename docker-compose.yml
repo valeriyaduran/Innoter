@@ -9,6 +9,18 @@ services:
     volumes:
       - .:/app
 
+  rabbitmq:
+    image: rabbitmq
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    depends_on:
+      - db
+
+
   db:
     image: postgres
     ports:
@@ -18,5 +30,18 @@ services:
     volumes:
       - postgres_volume:/var/lib/postgresql/data
 
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A innotter worker --loglevel=INFO
+    volumes:
+      - ./app:/app
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+      - rabbitmq
+      - app
 volumes:
   postgres_volume:
