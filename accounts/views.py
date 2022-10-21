@@ -1,11 +1,15 @@
+from botocore.retries import bucket
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLoginSerializer, \
     MyFollowersSerializer, FollowRequestsSerializer
 from accounts.services.auth_service import AuthService
+# from accounts.services.file_upload_service import FileUploadService
+from accounts.services.file_upload_service import FileUploadService
 from accounts.services.user_service import UserService
 from innoapp.serializers import PageSerializer
 
@@ -77,6 +81,7 @@ class AuthViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False)
     def register(self, request):
+        FileUploadService.upload_file_to_localstack(request)
         serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         User.objects.create(**serializer.validated_data)

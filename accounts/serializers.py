@@ -15,8 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email", "username", "password", "image_s3_path", "role", "is_blocked")
+        fields = ("email", "username", "password", "is_blocked")
         extra_kwargs = {'password': {'write_only': True}}
+
 
     def validate_email(self, email):
         regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
