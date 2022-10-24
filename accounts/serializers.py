@@ -18,6 +18,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ("email", "username", "password", "is_blocked")
         extra_kwargs = {'password': {'write_only': True}}
 
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
+
 
     def validate_email(self, email):
         regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'

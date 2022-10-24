@@ -1,33 +1,47 @@
-import os
-
 import boto3
-from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+
+from innotter import settings
 
 
-class FileUploadService:
+class AvatarUploadService:
 
     @staticmethod
-    def user_picture_upload(request):
-        user_picture = request.data.get('file')
-        print(user_picture.file)
+    def get_avatar(request):
+        user_picture = request.data['file']
         return user_picture
 
     @staticmethod
-    def upload_file_to_localstack(request):
+    def get_avatar_name(request):
+        avatar = AvatarUploadService.get_avatar(request)
+        avatar_name = avatar.name.split('.')[0]
+        return avatar_name
 
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket('innotterprofilepictures')
+    @staticmethod
+    def upload_avatar_to_localstack(request):
+        AvatarUploadService.check_avatar_extension(request)
+        s3 = boto3.client(
+            's3',
+            endpoint_url='http://host.docker.internal:4566/innotter-profile-pictures/'
+        )
 
-        with open(FileUploadService.user_picture_upload(request).name, 'rb') as data:
-            bucket.upload_fileobj(data, 'aws_access_key_id')
-        # s3 = boto3.client(
-        #     's3',
-        #     aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        #     aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
-        # )
+        s3.upload_fileobj(
+            AvatarUploadService.get_avatar(request),
+            settings.AWS_STORAGE_BUCKET_NAME,
+            AvatarUploadService.get_avatar_name(request)
+        )
 
-        # data = s3.put_object(
-        #     Body=FileUploadService.user_picture_upload(request),
-        #     Bucket=os.getenv('AWS_STORAGE_BUCKET_NAME'),
-        #     Key='123'
-        # )
+        response = s3.generate_presigned_url('get_object',
+                                             Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                                                     'Key': AvatarUploadService.get_avatar_name(request)}
+                                             )
+        return response
+
+    @staticmethod
+    def check_avatar_extension(request):
+        try:
+            avatar_extension = AvatarUploadService.get_avatar(request).name.split('.')[1]
+        except IndexError:
+            raise ValidationError("File has no extension!")
+        if avatar_extension not in ('jpeg', 'jpg', 'png'):
+            raise ValidationError("Incorrect file extension!")
