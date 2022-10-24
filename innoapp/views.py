@@ -43,7 +43,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if str(my_page.pk) != self.kwargs['page_pk']:
             raise ValidationError("You don't have a permission to create posts for this page!")
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
-        tasks.send_email(my_page.owner.email, my_page.owner.username)
+        tasks.send_email(my_page.owner.email, my_page.owner.username, self.request)
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))

@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email", "username", "password", "image_s3_path", "role", "is_blocked")
+        fields = ("email", "username", "password")
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_email(self, email):
