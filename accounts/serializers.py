@@ -13,12 +13,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
-        fields = ("email", "username", "password", "is_blocked")
+        fields = ("email", "username", "image_s3_path", "password", "is_blocked")
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        validated_data['image_s3_path'] = self.initial_data['url']
         return User.objects.create(**validated_data)
 
 

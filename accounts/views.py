@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from accounts.models import User
@@ -79,6 +80,8 @@ class AuthViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False)
     def register(self, request):
         AvatarUploadService.upload_avatar_to_localstack(request)
+        url = AvatarUploadService.generate_url(request)
+        request.data['url'] = url
         serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

@@ -8,7 +8,9 @@ class AvatarUploadService:
 
     @staticmethod
     def get_avatar(request):
-        user_picture = request.data['file']
+        user_picture = request.data.get('file')
+        if not user_picture:
+            raise ValidationError("No avatar provided")
         return user_picture
 
     @staticmethod
@@ -31,6 +33,11 @@ class AvatarUploadService:
             AvatarUploadService.get_avatar_name(request)
         )
 
+    @staticmethod
+    def generate_url(request):
+        s3 = boto3.client(
+            's3'
+        )
         response = s3.generate_presigned_url('get_object',
                                              Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
                                                      'Key': AvatarUploadService.get_avatar_name(request)}
