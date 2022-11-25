@@ -1,9 +1,10 @@
 import jwt
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.exceptions import ValidationError
 from django.http import HttpResponseForbidden
 
+from accounts.exceptions.user_exceptions import UsernameNotFound, UnableToFollow
 from accounts.models import User
+from innoapp.exceptions.page_exceptions import CurrentUserPageNotFound, PageToFollowNotFound
 from innoapp.models import Page
 from innotter import settings
 
@@ -22,7 +23,7 @@ class UserService:
         try:
             usernames = request.data.get('username')
         except ObjectDoesNotExist:
-            raise ValidationError("No username provided")
+            raise UsernameNotFound()
         return usernames
 
     @staticmethod
@@ -33,16 +34,16 @@ class UserService:
                 username=request.data.get('username')
             ).pk
         except ObjectDoesNotExist:
-            raise ValidationError("No user by username provided")
+            raise UsernameNotFound()
         if current_user == requested_user:
-            raise ValidationError("You are not able to follow or accept yourself as a follower of your own page ")
+            raise UnableToFollow()
 
     @staticmethod
     def get_user_page_to_follow(request):
         try:
             page = Page.objects.get(owner=User.objects.get(username=request.data.get("username")))
         except ObjectDoesNotExist:
-            raise ValidationError("No page by URL provided")
+            raise PageToFollowNotFound()
         return page
 
     @staticmethod
@@ -50,7 +51,7 @@ class UserService:
         try:
             page = Page.objects.get(owner=User.objects.get(pk=UserService.get_user_id(request)))
         except ObjectDoesNotExist:
-            raise ValidationError("No page by URL provided")
+            raise CurrentUserPageNotFound()
         return page
 
     @staticmethod
