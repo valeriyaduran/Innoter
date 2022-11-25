@@ -10,6 +10,7 @@ from accounts.models import User
 from accounts.services.user_service import UserService
 from innoapp.exceptions.page_exceptions import PageNotFound
 from innoapp.exceptions.post_exceptions import PostNotFound
+from innoapp import tasks
 from innoapp.models import Page, Post, Tag
 from innoapp.permissions import IsAdminModeratorOrForbidden, IsAdminModeratorOrDontSeeBlockedContent
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
@@ -68,6 +69,7 @@ class PostViewSet(viewsets.ModelViewSet):
             if str(my_page.pk) != self.kwargs['page_pk']:
                 raise ValidationError("You don't have a permission to create posts for this page!")
             serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))
+            tasks.send_email(my_page.owner.email, my_page.owner.username, self.request)
 
     def perform_update(self, serializer):
         serializer.save(page=Page.objects.get(pk=self.kwargs['page_pk']))

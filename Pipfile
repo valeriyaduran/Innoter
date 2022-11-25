@@ -18,6 +18,8 @@ python-dateutil = "*"
 boto3 = "*"
 awscli = "*"
 s3transfer = "*"
+celery = "*"
+rabbitmq = "*"
 
 [dev-packages]
 
