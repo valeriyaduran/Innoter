@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from accounts.exceptions.user_exceptions import UsernameNotFound
@@ -8,6 +9,7 @@ from accounts.permissions import IsAdminOrForbidden
 from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLoginSerializer, \
     MyFollowersSerializer, FollowRequestsSerializer, BlockUserSerializer
 from accounts.services.auth_service import AuthService
+from accounts.services.file_upload_service import AvatarUploadService
 from accounts.services.user_service import UserService
 from innoapp.permissions import IsAdminModeratorOrDontSeeBlockedContent
 from innoapp.serializers import PageSerializer
@@ -81,9 +83,12 @@ class AuthViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False)
     def register(self, request):
+        AvatarUploadService.upload_avatar_to_localstack(request)
+        url = AvatarUploadService.generate_url(request)
+        request.data['url'] = url
         serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        User.objects.create(**serializer.validated_data)
+        serializer.save()
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False)

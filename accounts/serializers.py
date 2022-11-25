@@ -24,6 +24,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Spaces are not allowed in fields!")
         return attrs
 
+    def create(self, validated_data):
+        validated_data['image_s3_path'] = self.initial_data['url']
+        return User.objects.create(**validated_data)
+
+
     def validate_email(self, email):
         regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
         if not re.search(regex, email):
