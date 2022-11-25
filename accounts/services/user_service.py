@@ -52,3 +52,10 @@ class UserService:
         except ObjectDoesNotExist:
             raise ValidationError("No page by URL provided")
         return page
+
+    @staticmethod
+    def check_page_restrictions(request, page):
+        return not page.is_private or \
+               UserService.get_user_id(request) in [follower.pk for follower in
+                                                    page.followers.filter()] or \
+               UserService.get_user_id(request) == page.owner.pk
