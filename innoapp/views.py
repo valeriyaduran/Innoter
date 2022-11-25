@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -123,3 +123,10 @@ class FeedViewSet(viewsets.ModelViewSet):
             created_at__contains=today).filter(page__owner__is_blocked=False)
         all_posts = my_posts | followed_pages_posts
         return all_posts
+
+
+class PageSearchViewSet(viewsets.ModelViewSet):
+    queryset = Page.objects.all()
+    serializer_class = PageSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'uuid', 'tags__name']

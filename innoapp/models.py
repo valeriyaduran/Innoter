@@ -1,5 +1,5 @@
-import uuid as uuid
 from django.db import models
+import uuid
 
 from accounts.models import User
 
@@ -10,7 +10,7 @@ class Tag(models.Model):
 
 class Page(models.Model):
     name = models.CharField(max_length=80)
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, related_name='pages', blank=True)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='page')

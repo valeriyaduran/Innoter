@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostReplyViewSet, FeedViewSet
-from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostLikesViewSet, PostsWithMyLikesViewSet
+from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostReplyViewSet
+from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostLikesViewSet, PostsWithMyLikesViewSet, FeedViewSet, PageSearchViewSet
 
 from rest_framework_nested import routers
 
@@ -32,6 +32,7 @@ router.register(r'posts_with_my_likes', PostsWithMyLikesViewSet, basename='liked
 router.register(r'send_post_reply', PostReplyViewSet, basename='post-reply')
 router.register(r'feed', FeedViewSet, basename='feed')
 
+router.register(r'find_page', PageSearchViewSet, basename='page-search')
 
 urlpatterns = [
     path("api/v1/", include(page_router.urls)),
