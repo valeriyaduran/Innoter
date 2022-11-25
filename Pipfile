@@ -17,6 +17,7 @@ uuid = "*"
 python-dateutil = "*"
 boto3 = "*"
 awscli = "*"
+s3transfer = "*"
 
 [dev-packages]
 

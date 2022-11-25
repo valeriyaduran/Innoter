@@ -47,7 +47,7 @@ class AvatarUploadService:
     @staticmethod
     def check_avatar_extension(request):
         try:
-            avatar_extension = AvatarUploadService.get_avatar(request).name.split('.')[1]
+            avatar_extension = AvatarUploadService.get_avatar(request).name.split('.')[-1]
         except IndexError:
             raise ValidationError("File has no extension!")
         if avatar_extension not in ('jpeg', 'jpg', 'png'):

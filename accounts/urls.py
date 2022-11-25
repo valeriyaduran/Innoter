@@ -15,8 +15,7 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from accounts.views import UserFollowersViewSet, AuthViewSet, UserSearchViewSet
-from accounts.views import UserFollowersViewSet, AuthViewSet, BlockUserByAdminViewSet
+from accounts.views import UserFollowersViewSet, AuthViewSet, BlockUserByAdminViewSet, UserSearchViewSet
 
 from rest_framework_nested import routers
 

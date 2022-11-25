@@ -1,6 +1,6 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from accounts.exceptions.user_exceptions import UsernameNotFound
