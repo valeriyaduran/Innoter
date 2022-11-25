@@ -1,6 +1,12 @@
 from rest_framework.exceptions import APIException
 
 
+class CurrentUserNotFound(APIException):
+    status_code = 404
+    default_detail = 'User not found'
+    default_code = 'user_not_found_error'
+
+
 class UsernameNotFound(APIException):
     status_code = 404
     default_detail = 'No user found by username provided'

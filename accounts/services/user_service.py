@@ -1,9 +1,14 @@
+import datetime
+from dateutil import parser
 import jwt
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import ValidationError
 from django.http import HttpResponseForbidden
 
+from accounts.exceptions.user_exceptions import UsernameNotFound
 from accounts.exceptions.user_exceptions import UsernameNotFound, UnableToFollow
 from accounts.models import User
+from innoapp.exceptions.page_exceptions import CurrentUserPageNotFound, PageToFollowNotFound
 from innoapp.exceptions.page_exceptions import PageNotFound, PageToFollowNotFound
 from innoapp.models import Page
 from innotter import settings
@@ -39,7 +44,7 @@ class UserService:
             raise UnableToFollow()
 
     @staticmethod
-    def get_user_page_to_follow(request):
+    def get_user_page(request):
         try:
             page = Page.objects.get(owner=User.objects.get(username=request.data.get("username")))
         except ObjectDoesNotExist:
@@ -51,7 +56,7 @@ class UserService:
         try:
             page = Page.objects.get(owner=User.objects.get(pk=UserService.get_user_id(request)))
         except ObjectDoesNotExist:
-            raise PageNotFound()
+            raise CurrentUserPageNotFound()
         return page
 
     @staticmethod
@@ -60,3 +65,21 @@ class UserService:
                UserService.get_user_id(request) in [follower.pk for follower in
                                                     page.followers.filter()] or \
                UserService.get_user_id(request) == page.owner.pk
+
+    @staticmethod
+    def set_unblock_date(request):
+        page_to_block = UserService.get_user_page(request)
+        unblock_date = request.data.get('unblock_date')
+        parsed_date = parser.parse(unblock_date)
+        if datetime.datetime.utcnow() < parsed_date:
+            page_to_block.unblock_date = parsed_date
+            page_to_block.save()
+        else:
+            raise ValidationError("Unblock date must be later than today")
+        return page_to_block
+
+    @staticmethod
+    def is_admin_or_moderator(request):
+        return User.objects.get(pk=UserService.get_user_id(request)).is_superuser or User.objects.get(
+            pk=UserService.get_user_id(request)).role == 'moderator'
+

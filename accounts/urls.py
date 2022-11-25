@@ -16,6 +16,7 @@ Including another URLconf
 from django.urls import path, include
 
 from accounts.views import UserFollowersViewSet, AuthViewSet, UserSearchViewSet
+from accounts.views import UserFollowersViewSet, AuthViewSet, BlockUserByAdminViewSet
 
 from rest_framework_nested import routers
 
@@ -24,6 +25,7 @@ router = routers.SimpleRouter()
 router.register(r'auth', AuthViewSet, basename='register')
 router.register(r'page', UserFollowersViewSet, basename='page-followers')
 router.register(r'find_user', UserSearchViewSet, basename='user-search')
+router.register(r'users', BlockUserByAdminViewSet, basename='block-user')
 
 
 urlpatterns = [

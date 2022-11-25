@@ -1,6 +1,7 @@
 import os
 from os.path import join
 
+from django.contrib.auth.hashers import check_password
 from dotenv import load_dotenv
 from rest_framework.exceptions import AuthenticationFailed
 import datetime
@@ -18,9 +19,15 @@ class AuthService:
             user = User.objects.get(email=email)
         except Exception:
             raise AuthenticationFailed('User not found!')
+        if user.is_blocked:
+            raise AuthenticationFailed('Impossible to login, because user was blocked!')
 
-        if user.password != password:
-            raise AuthenticationFailed('Incorrect password!')
+        if user.is_superuser:
+            if not check_password(password, user.password):
+                raise AuthenticationFailed('Incorrect password!')
+        else:
+            if password != user.password:
+                raise AuthenticationFailed('Incorrect password!')
 
     @staticmethod
     def generate_token(request):

@@ -2,15 +2,19 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from accounts.exceptions.user_exceptions import UsernameNotFound
 from accounts.models import User
+from accounts.permissions import IsAdminOrForbidden
 from accounts.serializers import UserSerializer, UserRegisterSerializer, UserLoginSerializer, \
-    MyFollowersSerializer, FollowRequestsSerializer
+    MyFollowersSerializer, FollowRequestsSerializer, BlockUserSerializer
 from accounts.services.auth_service import AuthService
 from accounts.services.user_service import UserService
+from innoapp.permissions import IsAdminModeratorOrDontSeeBlockedContent
 from innoapp.serializers import PageSerializer
 
 
 class UserFollowersViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminModeratorOrDontSeeBlockedContent]
 
     serializer_classes = {
         'send_follow_requests': FollowRequestsSerializer,
@@ -32,7 +36,7 @@ class UserFollowersViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False)
     def send_follow_requests(self, request):
         UserService.compare_current_and_requested_users(request)
-        user_page = UserService.get_user_page_to_follow(request)
+        user_page = UserService.get_user_page(request)
         current_user = User.objects.get(pk=UserService.get_user_id(request))
 
         if user_page.is_private:
@@ -107,3 +111,24 @@ class UserSearchViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['username']
+
+
+class BlockUserByAdminViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrForbidden]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    @action(methods=['put'], detail=False)
+    def block_user(self, request):
+        try:
+            requested_user = User.objects.get(username=request.data.get("username"))
+        except ObjectDoesNotExist:
+            raise UsernameNotFound()
+        if requested_user.is_blocked:
+            requested_user.is_blocked = False
+        else:
+            requested_user.is_blocked = True
+        requested_user.save()
+        serializer = BlockUserSerializer(requested_user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
