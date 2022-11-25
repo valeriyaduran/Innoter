@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostReplyViewSet
-from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostLikesViewSet, PostsWithMyLikesViewSet, FeedViewSet, PageSearchViewSet
+from innoapp.views import PageViewSet, PostViewSet, TagViewSet, PostReplyViewSet, PostLikesViewSet, \
+    PostsWithMyLikesViewSet, FeedViewSet, PageSearchViewSet
 
 from rest_framework_nested import routers
 
