@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.services.user_service import UserService
+from innoapp.exceptions.page_exceptions import PageNotFound
 from innoapp.exceptions.post_exceptions import PostNotFound
 from innoapp.models import Page, Post, Tag
 from innoapp.serializers import PageSerializer, PostSerializer, TagSerializer
@@ -57,7 +58,7 @@ class PostReplyViewSet(viewsets.ModelViewSet):
         try:
             page_for_post_reply = Page.objects.get(posts=self.request.data.get("reply_to"))
         except ObjectDoesNotExist:
-            raise ValidationError("Page does not exist!")
+            raise PageNotFound()
         if UserService.check_page_restrictions(self.request, page_for_post_reply):
             serializer.save(page=page_for_post_reply)
         else:
@@ -80,15 +81,10 @@ class PostLikesViewSet(viewsets.ModelViewSet):
             user_post = Post.objects.get(pk=request.data.get("post"))
         except ObjectDoesNotExist:
             raise PostNotFound()
-        if user_post.liked_by.filter(pk=UserService.get_user_id(request)).exists():
-            user_post.liked_by.remove(UserService.get_user_id(request))
-        else:
-            user_post.liked_by.add(UserService.get_user_id(request))
-            raise ValidationError("Post does not exist!")
         try:
             page_for_post_like = Page.objects.get(posts=user_post)
         except ObjectDoesNotExist:
-            raise ValidationError("Page does not exist!")
+            raise PageNotFound()
         if UserService.check_page_restrictions(request, page_for_post_like):
             if user_post.liked_by.filter(pk=UserService.get_user_id(request)).exists():
                 user_post.liked_by.remove(UserService.get_user_id(request))

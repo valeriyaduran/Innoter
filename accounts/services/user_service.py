@@ -4,7 +4,7 @@ from django.http import HttpResponseForbidden
 
 from accounts.exceptions.user_exceptions import UsernameNotFound, UnableToFollow
 from accounts.models import User
-from innoapp.exceptions.page_exceptions import CurrentUserPageNotFound, PageToFollowNotFound
+from innoapp.exceptions.page_exceptions import PageNotFound, PageToFollowNotFound
 from innoapp.models import Page
 from innotter import settings
 
@@ -51,7 +51,7 @@ class UserService:
         try:
             page = Page.objects.get(owner=User.objects.get(pk=UserService.get_user_id(request)))
         except ObjectDoesNotExist:
-            raise CurrentUserPageNotFound()
+            raise PageNotFound()
         return page
 
     @staticmethod
