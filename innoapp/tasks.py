@@ -1,8 +1,6 @@
-from accounts.services.user_service import UserService
-from accounts.models import User
 from innotter import settings
 from innotter.celery import app
-from innoapp.email_message_params import EMAIL_SUBJECT, EMAIL_BODY
+from innoapp.services.email_message_params import EMAIL_SUBJECT, EMAIL_BODY
 from django.core.mail import send_mail
 
 
