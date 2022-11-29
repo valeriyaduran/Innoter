@@ -10,7 +10,7 @@ services:
       - .:/app
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3-management
     ports:
         - "5672:5672"
         - "15672:15672"
@@ -53,5 +53,70 @@ services:
       - db
       - rabbitmq
       - app
+
+#  microservice:
+#    container_name: microservice
+#    build:
+#      context: ./innotter_statictics
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8001:8001"
+#    depends_on:
+#      - db
+#    volumes:
+#      - .:/microservice
+
+  mongo-db:
+    container_name: innotter-mongo
+    image: mongo
+    restart: always
+    env_file:
+      - .env.dev
+    networks:
+      - innotter_network
+    volumes:
+      - mongo_volume:/data/db
+
+  fastapi:
+    container_name: innotter-fastapi
+    restart: always
+    build:
+      context: ./innotter_statictics
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.dev
+    networks:
+      - innotter_network
+    volumes:
+      - fastapi_volume:/app
+    depends_on:
+      - rabbitmq
+      - mongo-db
+
+  dynamodb-local:
+    container_name: statictics-dynamodb-local
+    image: amazon/dynamodb-local
+    ports:
+      - "8001:8001"
+
+  dynamodb-admin:
+    container_name: statictics--dynamodb-admin
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8002:8002"
+    environment:
+      DYNAMO_ENDPOINT: "http://dynamodb-local:8001"
+      AWS_REGION: "us-west-2"
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb-local
+
 volumes:
   postgres_volume:
+  mongo_volume:
+  fastapi_volume:
+
+networks:
+  innotter_network:
