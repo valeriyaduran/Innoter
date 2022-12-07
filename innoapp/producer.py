@@ -1,32 +1,18 @@
 import pika
 
-# connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-# channel = connection.channel()
-#
-# channel.queue_declare(queue='statistics', durable=True)
-#
-# message = "test"
-# channel.basic_publish(exchange='',
-#                       routing_key='statistics',
-#                       body=b'message',
-#                       properties=pika.BasicProperties(
-#                           delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-#                       )
-#                       )
-#
-# connection.close()
+from innotter.settings import RabbitMQ_USERNAME, RabbitMQ_PASSWORD, RabbitMQ_PORT, RabbitMQ_HOST
 
 
 class SendStatisticsClient:
 
     def __init__(self):
-        self.credentials = pika.credentials.PlainCredentials(username='guest',
-                                                             password='guest',
+        self.credentials = pika.credentials.PlainCredentials(username=RabbitMQ_USERNAME,
+                                                             password=RabbitMQ_PASSWORD,
                                                              erase_on_connect=False)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
-                host='rabbitmq',
-                port=5672,
+                host=RabbitMQ_HOST,
+                port=RabbitMQ_PORT,
                 credentials=self.credentials
             )
         )
@@ -40,3 +26,4 @@ class SendStatisticsClient:
             body=body,
             properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
         )
+        self.connection.close()
