@@ -1,18 +1,19 @@
 import pika
 
-from innotter.settings import RabbitMQ_USERNAME, RabbitMQ_PASSWORD, RabbitMQ_PORT, RabbitMQ_HOST
+from innotter.settings import RABBIT_USERNAME, RABBIT_PASSWORD, RABBIT_HOST, RABBIT_PORT
 
 
 class SendStatisticsClient:
-
     def __init__(self):
-        self.credentials = pika.credentials.PlainCredentials(username=RabbitMQ_USERNAME,
-                                                             password=RabbitMQ_PASSWORD,
-                                                             erase_on_connect=False)
+        self.credentials = pika.credentials.PlainCredentials(
+            username=RABBIT_USERNAME,
+            password=RABBIT_PASSWORD,
+            erase_on_connect=False
+        )
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
-                host=RabbitMQ_HOST,
-                port=RabbitMQ_PORT,
+                host=RABBIT_HOST,
+                port=RABBIT_PORT,
                 credentials=self.credentials
             )
         )
