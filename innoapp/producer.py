@@ -27,4 +27,3 @@ class SendStatisticsClient:
             body=body,
             properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
         )
-        self.connection.close()
