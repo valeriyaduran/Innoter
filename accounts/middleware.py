@@ -28,5 +28,6 @@ class JWTAuthMiddleware:
                 return HttpResponseForbidden("Signature has expired!")
 
         elif request.path not in ('/api/v1/auth/register/', '/api/v1/auth/login/') and not request.path.startswith(
-                '/admin/'):
+                '/admin/'
+        ):
             return HttpResponseForbidden('You are not allowed to perform this action! Please, login before.')

@@ -17,8 +17,8 @@ class PageSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         to_check_spaces = (attrs["name"], str(attrs["is_private"]))
         for item in to_check_spaces:
-                if re.search(r'\s', item):
-                    raise serializers.ValidationError("Spaces are not allowed in fields!")
+            if re.search(r'\s', item):
+                raise serializers.ValidationError("Spaces are not allowed in fields!")
         return attrs
 
 
