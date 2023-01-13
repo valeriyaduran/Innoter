@@ -26,12 +26,15 @@ class AvatarUploadService:
             's3',
             endpoint_url='http://host.docker.internal:4566/innotter-profile-pictures/'
         )
+        try:
+            s3.upload_fileobj(
+                AvatarUploadService.get_avatar(request),
+                settings.AWS_STORAGE_BUCKET_NAME,
+                AvatarUploadService.get_avatar_name(request)
+            )
+        except s3.exceptions.NoSuchBucket:
+            raise ValidationError("There is no bucket to upload the avatar")
 
-        s3.upload_fileobj(
-            AvatarUploadService.get_avatar(request),
-            settings.AWS_STORAGE_BUCKET_NAME,
-            AvatarUploadService.get_avatar_name(request)
-        )
 
     @staticmethod
     def generate_url(request):
