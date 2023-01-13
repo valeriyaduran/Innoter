@@ -1,6 +1,6 @@
 # Innoter
 
-A Twitter analogue.
+Twitter analogue.
 
 Technologies:
 Databases: PostgreSQL
