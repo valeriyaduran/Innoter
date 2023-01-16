@@ -20,6 +20,7 @@ awscli = "*"
 s3transfer = "*"
 celery = "*"
 rabbitmq = "*"
+pika = "*"
 
 [dev-packages]
 

@@ -31,9 +31,7 @@ class AuthService:
 
     @staticmethod
     def generate_token(request):
-        dotenv_path = join(BASE_DIR, '.env.dev')
-        load_dotenv(dotenv_path)
-        minutes_token_valid = os.getenv("MINUTES_TOKEN_VALID")
+        minutes_token_valid = settings.MINUTES_TOKEN_VALID
         user = User.objects.get(email=request.data.get('email'))
 
         payload = {

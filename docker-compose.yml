@@ -1,45 +1,47 @@
-
 services:
   app:
     build: .
     ports:
       - "8000:8000"
+    networks:
+      - innotter_network
     depends_on:
       - db
     volumes:
       - .:/app
-
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3-management
     ports:
         - "5672:5672"
         - "15672:15672"
+    networks:
+      - innotter_network
     volumes:
         - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
         - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     depends_on:
       - db
-
-
   db:
     image: postgres
     ports:
       - "5433:5432"
+    networks:
+      - innotter_network
     env_file:
       - .env.dev
     volumes:
       - postgres_volume:/var/lib/postgresql/data
-
   localstack:
     image: localstack/localstack:latest
     ports:
       - "4566:4566"
+    networks:
+      - innotter_network
     env_file:
       - .env.dev
     volumes:
       - "${TMPDIR:-/tmp}/localstack:/var/lib/localstack"
       - /var/run/docker.sock:/var/run/docker.sock
-
   celery:
     restart: always
     build:
@@ -47,11 +49,17 @@ services:
     command: celery -A innotter worker --loglevel=INFO
     volumes:
       - .:/app
+    networks:
+      - innotter_network
     env_file:
       - .env.dev
     depends_on:
       - db
       - rabbitmq
       - app
+
 volumes:
   postgres_volume:
+
+networks:
+  innotter_network:

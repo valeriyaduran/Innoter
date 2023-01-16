@@ -40,7 +40,6 @@ class UserFollowersViewSet(viewsets.ModelViewSet):
         UserService.compare_current_and_requested_users(request)
         user_page = UserService.get_user_page(request)
         current_user = User.objects.get(pk=UserService.get_user_id(request))
-
         if user_page.is_private:
             user_page.follow_requests.add(current_user)
         else:
@@ -59,10 +58,11 @@ class UserFollowersViewSet(viewsets.ModelViewSet):
         my_page = UserService.get_current_page(request)
         usernames = UserService.get_usernames(request)
         if usernames:
-            for username in usernames:
-                my_page.followers.add(User.objects.get(username=username))
-                my_page.follow_requests.remove(User.objects.get(username=username))
-
+            existing_users = User.objects.filter(username__in=usernames)
+            for user in existing_users:
+                if user in my_page.follow_requests.all():
+                    my_page.followers.add(user)
+                    my_page.follow_requests.remove(user)
         serializer = self.get_serializer(my_page)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -71,8 +71,10 @@ class UserFollowersViewSet(viewsets.ModelViewSet):
         my_page = UserService.get_current_page(request)
         usernames = UserService.get_usernames(request)
         if usernames:
-            for username in usernames:
-                my_page.follow_requests.remove(User.objects.get(username=username))
+            existing_users = User.objects.filter(username__in=usernames)
+            for user in existing_users:
+                if user in my_page.follow_requests.all():
+                    my_page.follow_requests.remove(user)
         serializer = self.get_serializer(my_page)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -98,7 +100,6 @@ class AuthViewSet(viewsets.ModelViewSet):
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
         AuthService.check_login(email, password)
-
         response = Response()
         response.headers = {'jwt': AuthService.generate_token(request)}
         return response
